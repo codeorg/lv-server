@@ -1,0 +1,31 @@
+{
+  "name": "lv-server",
+  "version": "0.1.1",
+  "description": "A pure node.js JavaScript Server implementing the Leveldb protocol.",
+  "main": "index.js",
+  "bin": {
+    "lv-server": "Connection.js"
+  },
+  "dependencies": {
+    "co-util": "^0.1.17"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codeorg/lv-server.git"
+  },
+  "keywords": [
+    "level",
+    "leveled",
+    "nodejs"
+  ],
+  "author": "codeorg.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/codeorg/lv-server/issues"
+  },
+  "homepage": "https://github.com/codeorg/lv-server#readme"
+}

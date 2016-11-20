@@ -8,16 +8,12 @@ const util=require('co-util');
 class Server extends events.EventEmitter{
     constructor(opts){
         super();
-        this._opts=this.validator(opts);
-        util.mkdir(this._opts.path);
-
-        //console.log(util.guid())
+        //this._opts=opts;
+        util
+        console.log(util.guid())
     }
     validator(opts){
-        if(!opts) throw new Error('lerver server options is null!');
-        if(!opts.path) throw new Error('leveldb path is null!');
-
-
+        if(!this._opts.path) throw new Error('leveldb path is null!');
     }
     start(){
         let serv = net.createServer((socket) => {
@@ -43,6 +39,4 @@ class Server extends events.EventEmitter{
         });
     }
 }
-
-let _server=new Server();
-module.exports=_server;
+module.exports=Server;
