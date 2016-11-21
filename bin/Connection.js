@@ -41,7 +41,7 @@ class Connection extends events.EventEmitter{
             this._socket.end();
         });
         this._socket.on('end', () => {
-            console.log('disconnected from server');
+            console.log('disconnected from _server');
             this.emit('end',this);
             //console.log(this._socket)
         });
@@ -54,7 +54,7 @@ class Connection extends events.EventEmitter{
 
         // this._socket.destroy();
         // this._socket.on('close', () => {
-        //     console.log('disconnected from server');
+        //     console.log('disconnected from _server');
         //     console.log(this._socket)
         // });
 

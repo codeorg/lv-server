@@ -35,7 +35,7 @@ class Server extends events.EventEmitter{
             port: 7777,
             exclusive: true
         },() => {
-            console.log('opened server on', serv.address());
+            console.log('opened _server on', serv.address());
         });
     }
 }

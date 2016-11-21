@@ -11,24 +11,24 @@ var LevelBase = require('./LevelBase');
 
 class LevelServer{
     constructor() {
-        this.lv={};
+        this._levels={};
         config.levelServer.dbs.forEach( (item)=>{
             let o={path:path.join(__dirname,'../level/'+item.db)}
             if(item.expire)o.expire=item.expire;
             o.session=!!item.session;
             //o.prefix=item.prefix||"";
-            this.lv[item.db]=new LevelBase(o);
+            this._levels[item.db]=new LevelBase(o);
         });
         this.createServer();
     }
     createServer() {
-        this.server = net.createServer((socket)=> {
+        this._server = net.createServer((socket)=> {
             var str = '';
             socket.on('data',  (data)=>{
                 str += data.toString();
                 if (str.indexOf("}") !== -1) {
                     let obj = this.parse(str);
-                    var level = this.lv[obj.db]
+                    var level = this._levels[obj.db]
                     console.log(obj);
 
                     level[obj.fn].apply(level, obj.args).then(function (res) {
@@ -43,17 +43,17 @@ class LevelServer{
             });
 
         });
-        this.server.on('error', (err) => {
+        this._server.on('error', (err) => {
             console.log(err);
             setTimeout( () =>{
-                this.server.close();
-                this.server.listen(config.levelServer.port,function(){
+                this._server.close();
+                this._server.listen(config.levelServer.port,function(){
                     console.log('服务已启动 port:'+config.levelServer.port);
                 });
             }, 1000);
         });
 
-        this.server.listen(config.levelServer.port, function() {
+        this._server.listen(config.levelServer.port, function() {
             console.log('服务已启动 port:'+config.levelServer.port);
         });
     }
