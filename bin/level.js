@@ -2,15 +2,16 @@
  * Created by codeorg.com on 2016/8/5.
  */
 "use strict";
-var levelup = require('levelup'),
-    ttl  = require('level-ttl');
+var levelup = require('levelup');
+    //ttl  = require('level-ttl');
 
 class Level {
     constructor(opts) {
         this._opts=opts;
-        this._opts.expire=this._opts.expire||0;
+        //this._opts.expire=this._opts.expire||10;
         this.db=levelup(this._opts.path);
-        if(this._opts.expire>0)this.db = ttl(this.db);
+        // if(this._opts.expire>0)
+         this.ssss="sss"
     }
     //获取
     get(key) {
@@ -29,14 +30,14 @@ class Level {
     }
     //写入
     set(key, value) {
-       console.log("value",value)
+       //console.log("value",value)
         return new Promise((resolve, reject)=> {
             if (typeof value == "object") value = JSON.stringify(value);
             this.db.put(key, value,  (err) =>{
                 if (err) {
                     resolve(false);
                 } else {
-                    if(this._opts.expire>0)this.db.ttl(key, this._opts.expire);
+                    //if(this._opts.expire>0)this.db.ttl(key, this._opts.expire);
                     resolve(true);
                 }
             })
@@ -46,7 +47,7 @@ class Level {
     remove(key) {
         return new Promise((resolve, reject)=> {
             console.log(key)
-            this.db.del(key, function (err) {
+            this.db.del(key,  (err) =>{
                 console.log(err)
                 if (err) {
                     resolve(false);
@@ -72,21 +73,22 @@ class Level {
             }
             console.log(option)
             var arr = [];
-            var readStream = this.db.createReadStream(option).on('data', function (data) {
+            var readStream = this.db.createReadStream(option).on('data',  (data)=>{
                 //如果是过期模式的，则不解析成json
-                let obj = this._opts.expire>0?data.value:JSON.parse(data.value);
-                //console.log(obj)
+                //let obj = this._opts.expire>0?data.value:JSON.parse(data.value);
+                let obj = JSON.parse(data.value);
+                console.log(data.key,data.value)
                 //obj.key = data.key;
                 arr.push(obj);
                 if (option.limit == 1) {
                     resolve(arr);
                     readStream.destroy();
                 }
-            }).on('error', function (err) {
+            }).on('error',  (err) =>{
                 resolve(null);
-            }).on('close', function () {
+            }).on('close',  ()=> {
                 resolve(null);
-            }).on('end', function () {
+            }).on('end',  ()=> {
                 resolve(arr);
             });
 

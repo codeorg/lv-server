@@ -8,10 +8,10 @@ const util=require('co-util');
 const Level=require('./bin/level');
 
 class Server extends events.EventEmitter{
-    constructor(opts){
+    constructor(opts) {
         super();
-        //console.log(opts)
-        this._opts=this._validator(opts);
+        this._opts = this._validator(opts);
+        this._levels = {};
         util.mkdir(this._opts.path);
         this._createLevel();
         this._createServer();
@@ -23,32 +23,38 @@ class Server extends events.EventEmitter{
         opts.password=opts.password||'codeorg.com';
         return opts;
     }
+    _addLevel(db){
+        if(!db) return;
+        if(this._levels.hasOwnProperty(db)) return;
+        this._levels[db]=new Level({path:path.join(this._opts.path,db)});
+    }
     _createLevel(){
-        this._levels={};
-        this._opts.collections.forEach( (db)=>{
-            let obj={path:path.join(this._opts.path,db.name)};
-            if(db.expire)obj.expire=db.expire;
-            //console.log(obj)
-            this._levels[db.name]=new Level(obj);
+        util.dirs(this._opts.path).then((files)=>{
+            files.forEach( (db)=>{
+                this._addLevel(db);
+            })
         })
+
     }
     _createServer(){
         this._server = net.createServer((socket)=> {
             let str = '';
             socket.on('data',  (data)=> {
+                //console.log(data.toString());
                 str += data.toString();
                 if (str.indexOf("}") !== -1) {
-                    let obj;
-                    try {
-                        obj = this._parse(str);
-                    }catch(e){
-                        this.emit('error',e);
-                        //socket.write(res);
+                    let obj = this._parse(str);
+                    if(!obj){
+                        this.emit('error','字符串无法解密');
+                        socket.end();
+                        return;
                     }
-                    let level = this._levels[obj.db]
-                    console.log(obj);
-                    level[obj.fn].apply(level, obj.args).then((res) => {
-                        if (typeof res == 'object') res = JSON.stringify(res);
+                    if(!this._levels.hasOwnProperty(obj.db))this._addLevel(obj.db);
+                    let level = this._levels[obj.db];
+
+                    level[obj.fn].apply(level, obj.args).then((res)=> {
+                        //console.log(res)
+                        res = JSON.stringify(res);
                         socket.write(res);
                     });
                 }
@@ -66,6 +72,7 @@ class Server extends events.EventEmitter{
         if (!str) return "";
         str = str.replace(/^\{([\w\W]+)\}$/, "$1");
         str = util.aesDecrypt(str, this._opts.password);
+        if(!str) return null;
         str = "{" + str + "}";
         return JSON.parse(str);
     }
@@ -76,16 +83,5 @@ class Server extends events.EventEmitter{
         });
     }
 }
-let config={
-    port:7011,
-    password:'96188',
-    path:require('path').join(__dirname,'level'),
-    collections:[{name:'captcha',expire:1000*15},{name:'admin',expire:1000*60*30},{name:'user',expire:1000*60*30},{name:'cache'}]
-};
 
-let serv=new Server(config);
-serv.listen();
-serv.on('start',(port)=>{
-    console.log('服务已启动 port:'+port);
-})
-module.exports=serv;
+module.exports=Server;
